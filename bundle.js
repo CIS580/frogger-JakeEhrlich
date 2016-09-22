@@ -4,11 +4,38 @@
 /* Classes */
 const Game = require('./game.js');
 const Player = require('./player.js');
+const Car = require('./car.js');
 
 /* Global variables */
 var canvas = document.getElementById('screen');
 var game = new Game(canvas, update, render);
 var player = new Player({x: 0, y: 256});
+var cars = []
+var speed = 0.1;
+for(var i = 0; i < 2; ++i) {
+  cars.push(new Car(speed, {x: 64, y: i*240}, 0.0));
+}
+for(var i = 0; i < 2; ++i) {
+  cars.push(new Car(-speed, {x: 32, y: i*240}, Math.PI));
+}
+for(var i = 0; i < 1; ++i) {
+  cars.push(new Car(2*speed, {x: 128+32, y: i*240}, 0.0));
+}
+for(var i = 0; i < 1; ++i) {
+  cars.push(new Car(-2*speed, {x: 128, y: i*240}, Math.PI));
+}
+for(var i = 0; i < 1; ++i) {
+  cars.push(new Car(4*speed, {x: 96*2+64, y: i*240}, 0.0));
+}
+for(var i = 0; i < 4; ++i) {
+  cars.push(new Car(-1.5*speed, {x: 96*2+32, y: i*64}, Math.PI));
+}
+for(var i = 0; i < 6; ++i) {
+  cars.push(new Car(0.5*speed, {x: 96*2+64+96, y: i*64}, 0.0));
+}
+for(var i = 0; i < 3; ++i) {
+  cars.push(new Car(-2.5*speed, {x: 96*2+32+96, y: i*120}, Math.PI));
+}
 
 /**
  * @function masterLoop
@@ -32,6 +59,7 @@ masterLoop(performance.now());
  */
 function update(elapsedTime) {
   player.update(elapsedTime);
+  cars.forEach(function(c){c.update(elapsedTime);})
   // TODO: Update the game objects
 }
 
@@ -45,8 +73,8 @@ function update(elapsedTime) {
 function render(elapsedTime, ctx) {
   ctx.fillStyle = "green";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  for(var i = 1; i < 24; i += 3) {
+  //render background
+  for(var i = 1; i < 12; i += 3) {
     var x = 32*i;
     ctx.fillStyle = "grey";
     ctx.fillRect(x, 0, 64, canvas.height);
@@ -57,10 +85,55 @@ function render(elapsedTime, ctx) {
     ctx.lineTo(x + 32, canvas.height + 32);
     ctx.stroke();
   }
+  for(var i = 13; i < 22; ++i) {
+    var x = 32*i;
+    ctx.fillStyle = "blue";
+    ctx.fillRect(x, 0, 64, canvas.height);
+  }
+  cars.forEach(function(c){c.render(elapsedTime, ctx);})
   player.render(elapsedTime, ctx);
 }
 
-},{"./game.js":2,"./player.js":3}],2:[function(require,module,exports){
+},{"./car.js":2,"./game.js":3,"./player.js":4}],2:[function(require,module,exports){
+"use strict";
+
+/**
+ * @module exports the Player class
+ */
+module.exports = exports = Car;
+
+function Car(speed, position, angle) {
+  this.speed = speed;
+  this.angle = angle;
+  this.x = position.x;
+  this.y = position.y;
+  this.width  = 30;
+  this.height = 52;
+  this.spritesheet  = new Image();
+  this.spritesheet.src = encodeURI('assets/cars_mini.svg');
+}
+
+Car.prototype.update = function(time) {
+  this.y -= this.speed*time;
+  if(this.y + this.height < 10 && this.speed > 0) this.y = 500;
+  else if(this.y > 780) this.y = -100;
+}
+
+Car.prototype.render = function(time, ctx) {
+  ctx.translate(this.x + this.width/2, this.y + this.height/2);
+  ctx.rotate(this.angle);
+  ctx.drawImage(
+    // image
+    this.spritesheet,
+    // source rectangle
+    0, 0, 200, 345,
+    // destination rectangle
+    -this.width/2, -this.height/2, this.width, this.height
+  );
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+},{}],3:[function(require,module,exports){
 "use strict";
 
 /**
@@ -118,7 +191,7 @@ Game.prototype.loop = function(newTime) {
   this.frontCtx.drawImage(this.backBuffer, 0, 0);
 }
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 const MS_PER_FRAME = 1000/8;
