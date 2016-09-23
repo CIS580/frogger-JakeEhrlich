@@ -107,14 +107,21 @@ function update(elapsedTime) {
     }
   });
   cars.forEach(function(c) {
-    if(checkCollide(box, c)) game.over = true;
+    if(checkCollide(box, c)) {game.over = true; player = new Player({x: 0, y: 256});}
   });
   cars.forEach(function(c){c.update(elapsedTime);});
   if(player.state == "idle" && player.x < 704+32 && player.x >= 416 && player.speed == 0) {
     game.over = true;
+    player = new Player({x: 0, y: 256});
   }
-  if(box.y + box.height <= 0 || player.y >= 484) game.over = true;
-  if(box.x + box.width <= 0) game.over = true;
+  if(box.y + box.height <= 0 || player.y >= 484) {
+    game.over = true;
+    player = new Player({x: 0, y: 256});
+  }
+  if(box.x + box.width <= 0) {
+    game.over = true;
+    player = new Player({x: 0, y: 256});
+  }
 }
 
 //take and modified from this: https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
@@ -158,4 +165,5 @@ function render(elapsedTime, ctx) {
   ctx.font = "30px serif";
   ctx.fillStyle = "black";
   ctx.fillText("score: " + game.score, 40, 40);
+  ctx.fillText("lives: " + game.lives, 40, 80);
 }

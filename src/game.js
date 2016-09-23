@@ -17,6 +17,7 @@ function Game(screen, updateFunction, renderFunction) {
   this.render = renderFunction;
   this.over = false;
   this.score = 0;
+  this.lives = 3;
   // Set up buffers
   this.frontBuffer = screen;
   this.frontCtx = screen.getContext('2d');
@@ -49,13 +50,16 @@ Game.prototype.loop = function(newTime) {
   var elapsedTime = newTime - this.oldTime;
   this.oldTime = newTime;
 
-  if(this.over) {
+  if(this.over && this.lives === 1) {
     this.frontCtx.fillStyle = "white";
     this.frontCtx.fillRect(0, 0, this.frontBuffer.width, this.frontBuffer.height);
     this.frontCtx.fillStyle = "black";
     this.frontCtx.fillText("DED", 764/2 - 50, 484/2 - 20);
     this.frontCtx.drawImage(this.backBuffer, 0, 0);
     return;
+  } else if(this.over) {
+    this.over = false;
+    game.lives -= 1;
   }
 
   if(!this.paused) this.update(elapsedTime);
